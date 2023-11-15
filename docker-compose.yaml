@@ -1,0 +1,48 @@
+version: "3"
+services:
+  api-user:
+    build:
+      context: ./lowcode-api-user
+    image: mannmengineer/lowcode-api-user
+    environment:
+      POSTGRES_USERNAME: $POSTGRES_USERNAME
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_HOST: $POSTGRES_HOST
+      AWS_REGION: $AWS_REGION
+      AWS_PROFILE: $AWS_PROFILE
+      AWS_BUCKET: $AWS_BUCKET
+      JWT_SECRET: $JWT_SECRET
+      URL: "http://localhost:8100"
+  api-user-story:
+    build:
+      context: ./lowcode-api-user-story
+    image: mannmengineer/lowcode-api-user-story
+    volumes:
+      - $HOME/.aws:/root/.aws
+    environment:
+      POSTGRES_USERNAME: $POSTGRES_USERNAME
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_HOST: $POSTGRES_HOST
+      AWS_REGION: $AWS_REGION
+      AWS_PROFILE: $AWS_PROFILE
+      AWS_BUCKET: $AWS_BUCKET
+      JWT_SECRET: $JWT_SECRET
+      URL: "http://localhost:8100"
+  reverseproxy:
+    build:
+      context: ./lowcode-reverseproxy
+    image: mannmengineer/lowcode-reverseproxy
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - api-user
+      - api-user-story
+  frontend:
+    build:
+      context: ./lowcode-frontend
+    image: mannmengineer/lowcode-frontend
+    ports:
+      - "8100:80"
